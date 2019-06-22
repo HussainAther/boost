@@ -53,3 +53,5 @@ class Boosting:
             Evaluation["weights"] *= np.exp(alpha*Evaluation["misclassified"])
             #print("The Accuracy of the {0}. model is : ".format(t+1),accuracy*100,"%")
             #print("The missclassification rate is: ",misclassification*100,"%")
+        self.alphas = alphas
+        self.models = models
