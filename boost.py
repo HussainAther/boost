@@ -45,3 +45,11 @@ class Boosting:
             misclassification = sum(Evaluation["misclassified"])/len(Evaluation["misclassified"])
             # Caclulate the error
             err = np.sum(Evaluation["weights"]*Evaluation["misclassified"])/np.sum(Evaluation["weights"]) 
+            # Calculate the alpha values
+            alpha = np.log((1-err)/err)
+            alphas.append(alpha)
+            # Update the weights wi --> These updated weights are used in the sample_weight parameter
+            # for the training of the next decision stump. 
+            Evaluation["weights"] *= np.exp(alpha*Evaluation["misclassified"])
+            #print("The Accuracy of the {0}. model is : ".format(t+1),accuracy*100,"%")
+            #print("The missclassification rate is: ",misclassification*100,"%")
