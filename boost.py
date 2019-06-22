@@ -10,13 +10,38 @@ class Boosting:
 
     def fit(self):
         # Set the descriptive features and the target feature
-        X = self.dataset.drop(['target'],axis=1)
-        Y = self.dataset['target'].where(self.dataset['target']==1,-1)
+        X = self.dataset.drop(["target"],axis=1)
+        Y = self.dataset["target"].where(self.dataset["target"]==1,-1)
         # Initialize the weights of each sample with wi = 1/N and create a dataframe in which the evaluation is computed
         Evaluation = pd.DataFrame(Y.copy())
-        Evaluation['weights'] = 1/len(self.dataset) # Set the initial weights w = 1/N
+        Evaluation["weights"] = 1/len(self.dataset) # Set the initial weights w = 1/N
         
         # Run the boosting algorithm by creating T "weighted models"
         alphas = [] 
         models = []
-         
+                for t in range(self.T):
+            # Train the Decision Stump(s)
+            Tree_model = DecisionTreeClassifier(criterion="entropy",max_depth=1) # Mind the deth one --> Decision Stump
+            
+            # We know that we must train our decision stumps on weighted datasets where the weights depend on the results of
+            # the previous decision stumps. To accomplish that, we use the "weights" column of the above created 
+            # "evaluation dataframe" together with the sample_weight parameter of the fit method.
+            # The documentation for the sample_weights parameter sais: "[...] If None, then samples are equally weighted."
+            # Consequently, if NOT None, then the samples are NOT equally weighted and therewith we create a WEIGHTED dataset 
+            # which is exactly what we want to have.
+            model = Tree_model.fit(X,Y,sample_weight=np.array(Evaluation["weights"])) 
+            
+            # Append the single weak classifiers to a list which is later on used to make the 
+            # weighted decision
+            models.append(model)
+            predictions = model.predict(X)
+            score = model.score(X,Y)
+            # Add values to the Evaluation DataFrame
+            Evaluation["predictions"] = predictions
+            Evaluation["evaluation"] = np.where(Evaluation["predictions"] == Evaluation["target"],1,0)
+            Evaluation["misclassified"] = np.where(Evaluation["predictions"] != Evaluation["target"],1,0)
+            # Calculate the misclassification rate and accuracy
+            accuracy = sum(Evaluation["evaluation"])/len(Evaluation["evaluation"])
+            misclassification = sum(Evaluation["misclassified"])/len(Evaluation["misclassified"])
+            # Caclulate the error
+            err = np.sum(Evaluation["weights"]*Evaluation["misclassified"])/np.sum(Evaluation["weights"]) 
