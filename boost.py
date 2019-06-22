@@ -65,8 +65,50 @@ class Boosting:
         """
         X_test = self.test_dataset.drop(["target"],axis=1).reindex(range(len(self.test_dataset)))
         Y_test = self.test_dataset["target"].reindex(range(len(self.test_dataset))).where(self.dataset["target"]==1,-1)
-    
         # With each model in the self.model list, make a prediction 
-        
         accuracy = []
         predictions = []
+        for alpha,model in zip(self.alphas,self.models):
+            prediction = alpha*model.predict(X_test) # We use the predict method for the single decisiontreeclassifier models in the list
+            predictions.append(prediction)
+            self.accuracy.append(np.sum(np.sign(np.sum(np.array(predictions),axis=0))==Y_test.values)/len(predictions[0]))
+            # The above line of code could be a little bit confusing and hence I will do up the single steps:
+            # Goal: Create a list of accuracies which can be used to plot the accuracy against the number of base learners used for the model
+            # 1. np.array(predictions) --> This is the array which contains the predictions of the single models. It has the shape 8124xn
+            # and hence looks like [[0.998,0.87,...0.87...],[...],[...],[0.99,1.23,...,1.05,0,99...]] 
+            # 2. np.sum(np.array(predictions),axis=0) --> Summs up the first elements of the lists, that is 0,998+...+...+0.99. This is 
+            # done since the formula for the prediction wants us to sum up the predictions of all models for each instance in the dataset. 
+            # Hence if we have for example 3 models than the predictions array has the shape 8124x3 (Imagine a table with 3 columns and
+            # 8124 rows). Here the first column containst the predictions for the first model, the second column contains the 
+            # prediction for the second model, the third column the prediction for the third model (mind that the
+            # second and third model are influenced by the results of the first resoectvely the first and the
+            # second model). This is logical since the results from column (model)
+            # n-1 are used to alter the weights of the nth model and the results of the nth model are then used to alter the weights
+            # of the n+1 model. 
+            # 3. np.sign(np.sum(np.array(predictions),axis=0)) --> Since our test target data are elements of {-1,1} and we want to 
+            # have our prediction in the same format, we use the sign function. Hence each column in the accuracy array is like
+            # [-0.998,1.002,1.24,...,-0.89] and each element represents the combined and weighted prediction of all models up this column
+            # (so if we are for instance in the 5th column and for the 4th instnace we find the value -0.989, this value represents the 
+            # weighted prediction of a boosted model with 5 base learners for the 4th instance. The 4th instance of the 6th column represents
+            # the weighted and combined predictions of a boosted model with 6 base learners while the 4th instance of the 4th column represents
+            # the predction of a model with 4 base learners and so on and so forth...). To make a long story short, we are interested in the 
+            # the sign of these comined predictions. If the sign is positive, we know that the true prediction is more likely postive (1) then
+            # negaive (-1). The higher the value (postive or negative) the more likely it is that the model returns the correct prediction.
+            # 4. np.sum(np.sign(np.sum(np.array(predictions),axis=0))==Y_test.values)/len(predictions[0]) --> With the last step we have transformed the array 
+            # into the shape 8124x1 where the instances are elements {-1,1} and therewith we are now in the situation to compare this 
+            # prediction with our target feature values. The target feature array is of the shape 8124x1 since for each row it contains
+            # exactly one prediction {-1,1} just as our just created array above --> Ready to compare ;).
+            # The comparison is done with the == Y_test.values command. As result we get an 
+            # array of the shape 8124x1 where the instances are elements of {True,False} (True if our prediction is consistent with the 
+            # target feature value and False if not). Since we want to calculate a percentage value we have to calculate the fraction of 
+            # instances which have been classified correctly. Therefore we simply sum up the above comparison array 
+            # with the elements {True,False} along the axis 0.
+            # and divide it by the total number of rows (8124) since True is the same as 1 and False is the same as 0. Hence correct predictions 
+            # increase the sum while false predictions does not change the sum. If we predicted nothing correct the calculation is 0/8124 and 
+            # therewith 0 and if we predicted everything correct, the calculation is 8124/8124 and thereiwth 1. 
+            # 5. self.accuracy.append(np.sum(np.sign(np.sum(np.array(predictions),axis=0))==Y_test.values)/len(predictions[0])) -->
+            # After we have computed the above steps, we add the result to the self.accuracy list. This list has the shape n x 1, that is,
+            # for a model with 5 base learners this list has 5 entries where the 5th entry represents the accuracy of the model when all
+            # 5 base learners are combined, the 4th element the accuracy of the model when 4 base learners are combined and so on and so forth. This 
+            # procedure has been explained above. That's it and we can plot the accuracy.
+        self.predictions = np.sign(np.sum(np.array(predictions),axis=0))
