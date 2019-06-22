@@ -9,6 +9,9 @@ class Boosting:
         self.predictions = None
 
     def fit(self):
+        """
+        Train the model with the input dataset and test dataset.
+        """
         # Set the descriptive features and the target feature
         X = self.dataset.drop(["target"],axis=1)
         Y = self.dataset["target"].where(self.dataset["target"]==1,-1)
@@ -55,3 +58,15 @@ class Boosting:
             #print("The missclassification rate is: ",misclassification*100,"%")
         self.alphas = alphas
         self.models = models
+        
+    def predict(self):
+        """
+        Predict.
+        """
+        X_test = self.test_dataset.drop(["target"],axis=1).reindex(range(len(self.test_dataset)))
+        Y_test = self.test_dataset["target"].reindex(range(len(self.test_dataset))).where(self.dataset["target"]==1,-1)
+    
+        # With each model in the self.model list, make a prediction 
+        
+        accuracy = []
+        predictions = []
