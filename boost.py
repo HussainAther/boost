@@ -112,3 +112,20 @@ class Boosting:
             # 5 base learners are combined, the 4th element the accuracy of the model when 4 base learners are combined and so on and so forth. This 
             # procedure has been explained above. That's it and we can plot the accuracy.
         self.predictions = np.sign(np.sum(np.array(predictions),axis=0))
+        
+"""
+Plot the accuracy of the model against the number of stump-models used.
+"""
+
+number_of_base_learners = 50
+fig = plt.figure(figsize=(10,10))
+ax0 = fig.add_subplot(111)
+for i in range(number_of_base_learners):
+    model = Boosting(dataset,i,dataset)
+    model.fit()
+    model.predict()
+ax0.plot(range(len(model.accuracy)),model.accuracy, "-b")
+ax0.set_xlabel("# models used for Boosting ")
+ax0.set_ylabel("accuracy")
+print("With a number of ", number_of_base_learners, "base models we receive an accuracy of ", model.accuracy[-1]*100, "%")     
+plt.show()        
