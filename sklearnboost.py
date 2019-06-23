@@ -44,3 +44,5 @@ param_test1 = {"n_estimators":range(20,81,10)}
 gsearch1 = GridSearchCV(estimator = GradientBoostingClassifier(learning_rate=0.1, min_samples_split=500,min_samples_leaf=50,max_depth=8,max_features="sqrt", subsample=0.8,random_state=10), 
 param_grid = param_test1, scoring='roc_auc',n_jobs=4,iid=False, cv=5)
 gsearch1.fit(train[predictors],train[target])
+
+gsearch1.grid_scores_, gsearch1.best_params_, gsearch1.best_score_
