@@ -5,6 +5,9 @@ import matplotlib.pylab as plt
 from matplotlib.pylab import rcParams
 rcParams["figure.figsize"] = 12, 4
 
+from sklearn.ensemble import AdaBoostClassifier #For Classification
+from sklearn.ensemble import AdaBoostRegressor #For Regression
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import GradientBoostingClassifier  #GBM algorithm
 from sklearn import cross_validation, metrics   #Additional scklearn functions
 from sklearn.grid_search import GridSearchCV   #Perforing grid search
