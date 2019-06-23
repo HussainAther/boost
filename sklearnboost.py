@@ -37,3 +37,8 @@ def modelfit(alg, dtrain, predictors, performCV=True, printFeatureImportance=Tru
         feat_imp = pd.Series(alg.feature_importances_, predictors).sort_values(ascending=False)
         feat_imp.plot(kind="bar", title="Feature Importances")
         plt.ylabel("Feature Importance Score")
+
+#Choose all predictors except target & IDcols
+predictors = [x for x in train.columns if x not in [target, IDcol]]
+gbm0 = GradientBoostingClassifier(random_state=10)
+modelfit(gbm0, train, predictors)
