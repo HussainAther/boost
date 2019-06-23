@@ -16,3 +16,7 @@ Data can be downloaded from https://datahack.analyticsvidhya.com/contest/data-ha
 train = pd.read_csv("train_modified.csv")
 target = "Disbursed"
 IDcol = "ID"
+
+def modelfit(alg, dtrain, predictors, performCV=True, printFeatureImportance=True, cv_folds=5):
+    #Fit the algorithm on the data
+    alg.fit(dtrain[predictors], dtrain["Disbursed"])
