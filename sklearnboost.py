@@ -18,5 +18,11 @@ target = "Disbursed"
 IDcol = "ID"
 
 def modelfit(alg, dtrain, predictors, performCV=True, printFeatureImportance=True, cv_folds=5):
-    #Fit the algorithm on the data
+    #Fit the algorithm on the data.
     alg.fit(dtrain[predictors], dtrain["Disbursed"])
+    #Predict training set.
+    dtrain_predictions = alg.predict(dtrain[predictors])
+    dtrain_predprob = alg.predict_proba(dtrain[predictors])[:,1]
+    #Perform cross-validation.
+    if performCV:
+        cv_score = cross_validation.cross_val_score(alg, dtrain[predictors], dtrain["Disburse"], cv=cv_folds, scoring="roc_auc")
