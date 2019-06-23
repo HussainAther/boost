@@ -32,3 +32,8 @@ def modelfit(alg, dtrain, predictors, performCV=True, printFeatureImportance=Tru
     print("AUC Score (Train): %f" % metrics.roc_auc_score(dtrain['Disbursed'], dtrain_predprob))
     if performCV:
         print("CV Score : Mean - %.7g | Std - %.7g | Min - %.7g | Max - %.7g" % (np.mean(cv_score),np.std(cv_score),np.min(cv_score),np.max(cv_score)))
+    #Print Feature Importance.
+    if printFeatureImportance:
+        feat_imp = pd.Series(alg.feature_importances_, predictors).sort_values(ascending=False)
+        feat_imp.plot(kind="bar", title="Feature Importances")
+        plt.ylabel("Feature Importance Score")
