@@ -128,4 +128,5 @@ ax0.plot(range(len(model.accuracy)),model.accuracy, "-b")
 ax0.set_xlabel("# models used for Boosting ")
 ax0.set_ylabel("accuracy")
 print("With a number of ", number_of_base_learners, "base models we receive an accuracy of ", model.accuracy[-1]*100, "%")     
-plt.show()        
+plt.show()
+
